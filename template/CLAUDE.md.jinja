@@ -1,0 +1,72 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working with this repository.
+
+## What This Is
+
+{{ project_description }}
+
+## Commands
+
+```bash
+npm run dev              # Local dev server (vite)
+npm run preview          # Build + wrangler dev (Workers runtime)
+npm run build            # Vite build only
+npm run check            # Svelte type checking
+npm run lint             # Prettier + ESLint
+npm run format           # Auto-format with Prettier
+
+# Tests
+npm test                 # All tests (unit + e2e, single run)
+npm run test:unit        # Vitest watch mode
+npm run test:e2e         # Playwright e2e tests
+
+# Database
+npm run db:generate      # Generate migration from schema changes
+npm run db:migrate       # Apply migrations locally
+npm run db:migrate:prod  # Apply to production D1
+npm run db:studio        # Drizzle Studio
+npm run types            # Regenerate wrangler types
+```
+
+## Architecture
+
+**Stack:** SvelteKit 2 + Svelte 5, Cloudflare Workers + D1 (SQLite), Drizzle ORM, Tailwind CSS 4, mdsvex.
+
+**Runtime:** Cloudflare Workers app. The `platform` object from SvelteKit hooks/load functions provides D1 bindings. See `src/app.d.ts` for `App.Platform`.
+
+**Database access:** Call `getDb(platform)` from `src/lib/server/db/index.ts`. Never import D1 directly. Schema in `src/lib/server/db/schema/schema.ts`.
+
+**Migration workflow:** Edit schema -> `npm run db:generate` -> `npm run db:migrate`. The generate step converts Drizzle migrations into D1-compatible format automatically. **Never manually edit migration files.**
+
+**Testing:** Vitest with two project configurations in `vite.config.ts`:
+- `client`: Browser tests via Playwright for `.svelte.{test,spec}.ts` files (excludes `src/lib/server/`)
+- `server`: Node environment for all other `.test.ts` / `.spec.ts` files
+- All tests require assertions (`expect.requireAssertions: true`)
+- **Colocated test files should be the route filename without the `+`** — use `page.svelte.test.ts` (not `+page.svelte.test.ts`) to test a `+page.svelte` file
+
+## Testing Requirements
+
+- All server-side functions must have unit tests
+- Client interactions should have browser tests
+- Tests live next to source: `src/lib/foo.ts` -> `src/lib/foo.spec.ts`
+- Colocated route tests drop the `+` prefix: `page.svelte.test.ts` to test `+page.svelte`
+- No task is complete unless tests exist and pass
+- Small files preferred (few hundred lines max)
+
+## Code Style
+
+- 2-space indent, single quotes, no trailing commas, 100 char print width (see `.prettierrc`)
+- Svelte 5 runes syntax (not legacy `$:` reactivity)
+- TypeScript strict mode
+- Pre-commit hooks via husky + lint-staged
+
+## Development Process
+
+Always start with brainstorming unless it is a straightforward bugfix.
+Use worktrees for non-trivial changes. Worktrees use `.claude/worktrees/`.
+
+## Deployment
+
+1. Run prod migrations first: `npm run db:migrate:prod`
+2. Merge/push to main (auto-deploys via GitHub Actions)

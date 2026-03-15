@@ -1,0 +1,35 @@
+_subdirectory: template
+_min_copier_version: "9.0.0"
+
+project_name:
+  type: str
+  help: "Project name (used in package.json, wrangler.jsonc, D1 binding)"
+
+project_description:
+  type: str
+  default: ""
+
+d1_database_id:
+  type: str
+  help: "Production D1 database UUID"
+  default: ""
+
+d1_staging_database_id:
+  type: str
+  help: "Staging D1 database UUID (leave empty if no staging)"
+  default: ""
+
+custom_domain:
+  type: str
+  help: "Custom domain (e.g. myapp.mindlace.net, leave empty for workers.dev)"
+  default: ""
+
+use_r2:
+  type: bool
+  default: false
+  help: "Include R2 bucket binding"
+
+use_queues:
+  type: bool
+  default: false
+  help: "Include Queue producer binding"

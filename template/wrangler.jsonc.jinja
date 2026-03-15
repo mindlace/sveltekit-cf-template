@@ -1,0 +1,50 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "{{ project_name }}",
+  "compatibility_date": "2026-03-01",
+  "observability": {
+    "enabled": true
+  },
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare"
+  },
+  "d1_databases": [
+    {
+      "binding": "{{ project_name }}",
+      "database_name": "{{ project_name }}",
+      {% if d1_database_id %}"database_id": "{{ d1_database_id }}",{% else %}// "database_id": "TODO: run `wrangler d1 create {{ project_name }}` and paste UUID here",{% endif %}
+      "preview_database_id": "local",
+      "migrations_dir": "./migrations"
+    }
+  ]{% if custom_domain %},
+  "routes": [
+    {
+      "pattern": "{{ custom_domain }}",
+      "custom_domain": true
+    }
+  ]{% endif %}{% if use_r2 %},
+  "r2_buckets": [
+    {
+      "binding": "bucket",
+      "bucket_name": "{{ project_name }}"
+    }
+  ]{% endif %}{% if use_queues %},
+  "queues": {
+    "producers": [{ "queue": "{{ project_name }}-queue", "binding": "QUEUE" }]
+  }{% endif %}{% if d1_staging_database_id %},
+  "env": {
+    "staging": {
+      "d1_databases": [
+        {
+          "binding": "{{ project_name }}",
+          "database_name": "{{ project_name }}-staging",
+          "database_id": "{{ d1_staging_database_id }}",
+          "migrations_dir": "./migrations"
+        }
+      ]
+    }
+  }{% endif %}
+}
