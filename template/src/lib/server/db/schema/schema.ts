@@ -1,14 +1,12 @@
 // Define your Drizzle ORM schema here.
 // See https://orm.drizzle.team/docs/sql-schema-declaration
-//
-// Example:
-//
-// import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-//
-// export const users = sqliteTable('users', {
-//   id: integer('id').primaryKey({ autoIncrement: true }),
-//   name: text('name').notNull(),
-//   createdAt: integer('created_at', { mode: 'timestamp' })
-//     .notNull()
-//     .$default(() => new Date())
-// });
+
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+
+export const example = sqliteTable('example', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$default(() => new Date())
+});
