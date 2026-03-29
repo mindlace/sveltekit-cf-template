@@ -3,7 +3,7 @@ _min_copier_version: "9.0.0"
 
 project_name:
   type: str
-  help: "Project name (used in package.json, wrangler.jsonc, D1 binding)"
+  help: "Project name (used in package.json, wrangler.jsonc, database name)"
 
 project_description:
   type: str

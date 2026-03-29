@@ -6,6 +6,14 @@ This file provides guidance to Claude Code when working with this repository.
 
 {{ project_description }}
 
+## Setup
+
+```bash
+npm install          # Also runs `wrangler types` and `svelte-kit sync` via prepare
+```
+
+If you see type errors about `worker-configuration`, run `npm run types` to regenerate Cloudflare bindings.
+
 ## Commands
 
 ```bash
@@ -35,7 +43,21 @@ npm run types            # Regenerate wrangler types
 
 **Runtime:** Cloudflare Workers app. The `platform` object from SvelteKit hooks/load functions provides D1 bindings. See `src/app.d.ts` for `App.Platform`.
 
-**Database access:** Call `getDb(platform)` from `src/lib/server/db/index.ts`. Never import D1 directly. Schema in `src/lib/server/db/schema/schema.ts`.
+**Database access:** Call `getDb(platform)` from `src/lib/server/db/index.ts`. Never import D1 directly. The D1 binding is named `DB` in wrangler.jsonc. Schema in `src/lib/server/db/schema/schema.ts`.
+
+**Example usage in a load function:**
+
+```typescript
+// src/routes/items/+page.server.ts
+import { getDb } from '$lib/server/db';
+import { example } from '$lib/server/db/schema/schema';
+
+export async function load({ platform }) {
+  const db = getDb(platform!);
+  const rows = await db.select().from(example);
+  return { items: rows };
+}
+```
 
 **Migration workflow:** Edit schema -> `npm run db:generate` -> `npm run db:migrate`. The generate step converts Drizzle migrations into D1-compatible format automatically. **Never manually edit migration files.**
 

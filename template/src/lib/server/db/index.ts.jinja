@@ -6,14 +6,14 @@ import { building } from '$app/environment';
 export type Database = DrizzleD1Database<typeof schema>;
 
 let _db: Database | undefined;
-let _platform: App.Platform | undefined;
+let _d1Binding: unknown | undefined;
 
 function initDb(platform: App.Platform): Database {
-  if (_db && platform === _platform) {
+  const d1 = platform.env.DB;
+
+  if (_db && d1 === _d1Binding) {
     return _db;
   }
-
-  _platform = platform;
 
   if (building) {
     return new Proxy({} as Database, {
@@ -23,14 +23,14 @@ function initDb(platform: App.Platform): Database {
     }) as Database;
   }
 
-  if (!platform.env.{{ project_name }}) {
+  if (!d1) {
     throw new Error(
-      'D1 database binding "{{ project_name }}" not found in platform.env. ' +
+      'D1 database binding "DB" not found in platform.env. ' +
         'Make sure you are running with wrangler dev (for local) or deployed to Cloudflare Workers.'
     );
   }
 
-  const d1 = platform.env.{{ project_name }};
+  _d1Binding = d1;
   _db = drizzle(d1, { schema });
   return _db;
 }

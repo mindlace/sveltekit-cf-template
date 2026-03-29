@@ -1,0 +1,6 @@
+# Cloudflare local development secrets
+# Copy to .dev.vars for use with `wrangler dev`
+# See https://developers.cloudflare.com/workers/configuration/secrets/
+#
+# Example:
+# MY_SECRET=some-value

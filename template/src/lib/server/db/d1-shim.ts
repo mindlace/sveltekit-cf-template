@@ -8,6 +8,13 @@
  */
 import type BetterSqlite3 from 'better-sqlite3';
 
+const INTERNALS = Symbol('d1-shim-internals');
+
+interface D1ShimInternals {
+  sql: string;
+  boundValues: unknown[];
+}
+
 interface D1Result<T = Record<string, unknown>> {
   results: T[];
   success: boolean;
@@ -34,6 +41,8 @@ export function createD1Shim(sqlite: BetterSqlite3.Database): D1Shim {
 
   function makePrepared(sql: string, boundValues: unknown[] = []): BoundStatement {
     return {
+      [INTERNALS]: { sql, boundValues } as D1ShimInternals,
+
       bind(...values: unknown[]): BoundStatement {
         return makePrepared(sql, values);
       },
@@ -87,11 +96,17 @@ export function createD1Shim(sqlite: BetterSqlite3.Database): D1Shim {
       const results: D1Result<T>[] = [];
       const transaction = sqlite.transaction(() => {
         for (const stmt of stmts) {
-          let result: D1Result<T> | undefined;
-          void stmt.all<T>().then((r) => {
-            result = r;
+          const internals = (stmt as Record<symbol, D1ShimInternals>)[INTERNALS];
+          if (!internals) {
+            throw new Error('batch() only supports statements created by this D1 shim');
+          }
+          const prepared = sqlite.prepare(internals.sql);
+          const rows = prepared.all(...internals.boundValues) as T[];
+          results.push({
+            results: rows,
+            success: true,
+            meta: { duration: 0 }
           });
-          results.push(result!);
         }
       });
       transaction();

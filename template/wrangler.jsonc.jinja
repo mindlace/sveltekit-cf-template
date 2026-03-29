@@ -13,9 +13,14 @@
   },
   "d1_databases": [
     {
-      "binding": "{{ project_name }}",
+      "binding": "DB",
       "database_name": "{{ project_name }}",
-      {% if d1_database_id %}"database_id": "{{ d1_database_id }}",{% else %}// "database_id": "TODO: run `wrangler d1 create {{ project_name }}` and paste UUID here",{% endif %}
+{% if d1_database_id %}
+      "database_id": "{{ d1_database_id }}",
+{% else %}
+      // TODO: run `wrangler d1 create {{ project_name }}` and paste UUID below
+      // "database_id": "",
+{% endif %}
       "preview_database_id": "local",
       "migrations_dir": "./migrations"
     }
@@ -28,7 +33,7 @@
   ]{% endif %}{% if use_r2 %},
   "r2_buckets": [
     {
-      "binding": "bucket",
+      "binding": "BUCKET",
       "bucket_name": "{{ project_name }}"
     }
   ]{% endif %}{% if use_queues %},
@@ -39,7 +44,7 @@
     "staging": {
       "d1_databases": [
         {
-          "binding": "{{ project_name }}",
+          "binding": "DB",
           "database_name": "{{ project_name }}-staging",
           "database_id": "{{ d1_staging_database_id }}",
           "migrations_dir": "./migrations"
